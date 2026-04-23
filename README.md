@@ -2,7 +2,7 @@
 
 Scans recent daily notes for decisions, learnings, errors, and facts, and consolidates them into categorized reference files — preventing knowledge from getting buried in chronological logs and never surfacing again.
 
-> Part of [The Agent Crafting Table](https://github.com/The-Agent-Crafting-Table) — standalone agent system components for Claude Code.
+> Part of [The Agent Crafting Table](https://github.com/Agent-Crafting-Table) — standalone agent system components for Claude Code.
 
 ## The Problem
 
