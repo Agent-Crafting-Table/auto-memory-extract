@@ -4,18 +4,63 @@ Scans recent daily notes for decisions, learnings, errors, and facts, and consol
 
 > Part of [The Agent Crafting Table](https://github.com/Agent-Crafting-Table) — standalone agent system components for Claude Code.
 
+## How It Works
+
+```mermaid
+flowchart TD
+    A[memory/YYYY-MM-DD.md
+today's daily note] --> C[auto-memory-extract.js]
+    B[memory/YYYY-MM-DD.md
+yesterday's daily note] --> C
+
+    C --> D[Extract bullet-point lines
+matching knowledge signals]
+    D --> E{Classify by keyword}
+
+    E -->|docker/ssh/nginx/port| F1[infrastructure.md]
+    E -->|stripe/github/discord/api| F2[api-integrations.md]
+    E -->|postgres/schema/query| F3[database.md]
+    E -->|learned/lesson/insight| F4[learnings.md]
+    E -->|error/failed/bug/crash| F5[errors.md]
+    E -->|no category match| F6[uncategorized — skipped]
+
+    F1 --> DED[Deduplication check
+~60% fuzzy match against existing]
+    F2 --> DED
+    F3 --> DED
+    F4 --> DED
+    F5 --> DED
+
+    DED -->|duplicate| SKIP[Skipped]
+    DED -->|new| APPEND[Appended to memory/references/ file]
+    APPEND --> CAP{File at 60-line cap?}
+    CAP -->|yes| WARN[Warning — archive old entries]
+    CAP -->|no| DONE[Done]
+```
+
+```mermaid
+graph LR
+    subgraph "Knowledge Signals Extracted"
+        S1["Decision — decided, chose, choosing"]
+        S2["Fix — fixed, resolved, resolution"]
+        S3["Learning — learned, lesson, insight, realized"]
+        S4["Deployment — created, deployed, installed, configured"]
+        S5["Error — error, failed, broken, bug, crash"]
+        S6["Todo — todo, blocked, waiting on, pending"]
+        S7["Change — updated, changed, modified, migrated"]
+    end
+
+    subgraph "Line Format Required"
+        L1["- bullet point"]
+        L2["* bullet point"]
+        L3["✅ completed item"]
+        L4["❌ failed item"]
+    end
+```
+
 ## The Problem
 
 Long-running agents write daily notes. Over time, those notes pile up and the agent has to read hundreds of lines of historical context to find one fact. This script bridges the gap: it scans the last two days of notes for structured knowledge signals (decisions made, errors fixed, things deployed) and moves them into topical reference files the agent can load on demand.
-
-## How It Works
-
-1. Reads today's and yesterday's daily note files
-2. Extracts bullet-point lines matching "knowledge signals" (decision, fix, error, deployment, etc.)
-3. Categorizes each line by keyword matching against your defined topics
-4. Deduplicates against existing reference file content (fuzzy match, ~60% similarity threshold)
-5. Appends new items to the appropriate reference files, respecting per-file line limits
-6. Lines matching "learning" or "error" patterns are additionally added to `learnings.md` / `errors.md`
 
 ## Usage
 
